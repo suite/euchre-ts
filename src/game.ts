@@ -4,16 +4,23 @@ import { Player } from "./player";
 import { GameState } from "./gamestate";
 import { Deck } from "./deck";
 
+interface Hand {
+  pickedCard: Card;
+  player: Player;
+}
+
 export class Game {
   gameState: GameState;
   deck: Deck;
   players: Array<Player>;
   trump?: Card;
   possibleTrump?: Card;
+  currentHand: Array<Hand>;
   constructor(deck: Deck, players: Array<Player>) {
     this.deck = deck;
     this.players = players;
     this.gameState = GameState.IDLE;
+    this.currentHand = [];
   }
 
   deal() {
@@ -47,6 +54,7 @@ export class Game {
     console.log(`Trump: ${this.possibleTrump.format()}. Pickup or pass?`);
   }
 
+  //Main game loop
   async start(dealer: Player, starterNum: number) {
     console.log(`Player #${starterNum + 1} is starting`);
     while (true) {
@@ -85,7 +93,8 @@ export class Game {
 
             await this.input(this.players[customIndex]);
 
-            if (customIndex === 3) {
+            //TODO; check if error
+            if (customIndex === 2) {
               customIndex = 0;
             } else {
               customIndex++;
@@ -96,7 +105,22 @@ export class Game {
           break;
         }
         case GameState.INGAME: {
-          console.log("ingame");
+          //TODO; whoever wins starts
+          let customIndex = starterNum; //1
+          for (let i = 0; i < this.players.length; i++) {
+            if (this.gameState !== GameState.INGAME) break;
+
+            await this.input(this.players[customIndex]);
+
+            if (customIndex === this.players.length - 1) {
+              customIndex = 0;
+            } else {
+              customIndex++;
+            }
+          }
+
+          this.findBest(this.currentHand);
+
           break;
         }
       }
@@ -218,6 +242,87 @@ export class Game {
 
         break;
       }
+      case GameState.INGAME: {
+        console.log(`[${player.nickname}] You must play one card: `);
+        let nums: Array<String> = [];
+        for (let i = 0; i < player.cards.length; i++) {
+          console.log(`[${i}] ${player.cards[i].format()}`);
+          nums.push(i.toString());
+        }
+        const response = await prompts({
+          type: "text",
+          name: "value",
+          message: `[${
+            player.nickname
+          }] Which card would you like to play? [${nums.toString()}]`,
+          validate: value => nums.includes(value)
+        });
+
+        let pickedCard: Card = player.cards[parseInt(response.value)];
+        this.currentHand.push({
+          pickedCard,
+          player
+        });
+
+        break;
+      }
+    }
+  }
+
+  findBest(cardsPlayed: Array<Hand>) {
+    //make sure we have a trump card "H", "D", "S", "C"
+    if (this.trump) {
+      let winner: Hand = {
+        pickedCard: new Card("", {}),
+        player: new Player(false, "")
+      };
+      let secondSuit: string;
+      let currWinner: Hand = cardsPlayed[0];
+
+      //TODO: clean up?
+      switch (this.trump.suit) {
+        case "H":
+          secondSuit = "D";
+          break;
+        case "D":
+          secondSuit = "H";
+          break;
+        case "S":
+          secondSuit = "C";
+          break;
+        case "C":
+          secondSuit = "S";
+          break;
+        default:
+          secondSuit = "";
+      }
+
+      // if not follow suit, disregard
+      // trump suits always high
+
+      for (let card of cardsPlayed) {
+        if (card.pickedCard === new Card(this.trump.suit, { J: 11 })) {
+          winner = card;
+          break;
+        } else if (card.pickedCard === new Card(secondSuit, { J: 11 })) {
+          winner = card;
+          break;
+        } else if (card.pickedCard.suit === this.trump.suit) {
+        } else {
+          if (
+            Object.values(card.pickedCard.value)[0] >
+            Object.values(currWinner.pickedCard.value)[0]
+          ) {
+            currWinner = card;
+          }
+        }
+
+        if (cardsPlayed[cardsPlayed.length - 1] === card) {
+          winner = currWinner;
+        }
+      }
+
+      console.log(`Winner of the round: ${winner.player.nickname}`);
     }
   }
 }
