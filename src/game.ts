@@ -96,7 +96,7 @@ export class Game {
           break;
         }
         case GameState.INGAME: {
-          // console.log("trump");
+          console.log("ingame");
           break;
         }
       }
@@ -151,11 +151,24 @@ export class Game {
 
           //TODO: make a private message,
           //TODO: replace cards in deck
+
           console.log(
             `${player.cards[
               parseInt(response.value)
             ].format()} has been discarded!`
           );
+
+          let index = parseInt(response.value);
+          if (index > -1) {
+            player.cards.splice(index, 1);
+          }
+
+          player.cards.push(this.trump);
+
+          console.log(`[${player.nickname}] Your cards:`);
+          for (let card of player.cards) {
+            console.log(`${card.format()}`);
+          }
 
           this.gameState = GameState.INGAME;
         }
