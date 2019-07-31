@@ -26,7 +26,7 @@ for (let i = 0; i < players.length; i++) {
       starter = players[i + 1];
     }
     game.gameState = GameState.TRUMP_ONE;
-    game.start(starter, players.indexOf(starter));
+    game.start(players[i], players.indexOf(starter));
     break;
   }
 }

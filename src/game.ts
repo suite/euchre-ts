@@ -47,7 +47,7 @@ export class Game {
     console.log(`Trump: ${this.possibleTrump.format()}. Pickup or pass?`);
   }
 
-  async start(starter: Player, starterNum: number) {
+  async start(dealer: Player, starterNum: number) {
     console.log(`Player #${starterNum + 1} is starting`);
     while (true) {
       switch (this.gameState) {
@@ -65,11 +65,16 @@ export class Game {
             }
           }
 
+          //TODO: tidy up
           if (!this.trump) {
             this.gameState = GameState.TRUMP_TWO;
           } else {
-            this.gameState = GameState.INGAME;
+            this.gameState = GameState.DISCARD_CARD;
           }
+          break;
+        }
+        case GameState.DISCARD_CARD: {
+          await this.input(dealer);
           break;
         }
         case GameState.TRUMP_TWO: {
@@ -112,16 +117,47 @@ export class Game {
           case "Y":
             this.trump = this.possibleTrump;
             if (this.trump) {
-              //TOOD: allow player to discard one card
-              console.log(
-                `${this.trump.format()} has been the selected trump!`
-              );
-              this.gameState = GameState.INGAME;
+              //TODO: allow player to discard one card
+              console.log(`${this.trump.format()} has been selected trump!`);
+              this.gameState = GameState.DISCARD_CARD;
             }
             break;
           case "N":
             console.log(`${player.nickname} has passed!`);
             break;
+        }
+
+        break;
+      }
+      case GameState.DISCARD_CARD: {
+        if (this.trump) {
+          console.log(
+            `[${player.nickname}] You will be recieving ${this.trump.format()}`
+          );
+          console.log(`[${player.nickname}] You must discard one card: `);
+          let nums: Array<String> = [];
+          for (let i = 0; i < player.cards.length; i++) {
+            console.log(`[${i}] ${player.cards[i].format()}`);
+            nums.push(i.toString());
+          }
+          const response = await prompts({
+            type: "text",
+            name: "value",
+            message: `[${
+              player.nickname
+            }] Which card would you like to discard? [${nums.toString()}]`,
+            validate: value => nums.includes(value)
+          });
+
+          //TODO: make a private message,
+          //TODO: replace cards in deck
+          console.log(
+            `${player.cards[
+              parseInt(response.value)
+            ].format()} has been discarded!`
+          );
+
+          this.gameState = GameState.INGAME;
         }
 
         break;
