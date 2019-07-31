@@ -16,11 +16,13 @@ export class Game {
   trump?: Card;
   possibleTrump?: Card;
   currentHand: Array<Hand>;
+  startingSuit: string; //TODO: make sure to reset...
   constructor(deck: Deck, players: Array<Player>) {
     this.deck = deck;
     this.players = players;
     this.gameState = GameState.IDLE;
     this.currentHand = [];
+    this.startingSuit = "";
   }
 
   deal() {
@@ -264,6 +266,15 @@ export class Game {
           player
         });
 
+        if (this.startingSuit === "") {
+          this.startingSuit = pickedCard.suit;
+        }
+
+        let index = parseInt(response.value);
+        if (index > -1) {
+          player.cards.splice(index, 1);
+        }
+
         break;
       }
     }
@@ -276,48 +287,62 @@ export class Game {
         pickedCard: new Card("", {}),
         player: new Player(false, "")
       };
-      let secondSuit: string;
+
       let currWinner: Hand = cardsPlayed[0];
 
-      //TODO: clean up?
-      switch (this.trump.suit) {
-        case "H":
-          secondSuit = "D";
-          break;
-        case "D":
-          secondSuit = "H";
-          break;
-        case "S":
-          secondSuit = "C";
-          break;
-        case "C":
-          secondSuit = "S";
-          break;
-        default:
-          secondSuit = "";
-      }
+      const secondSuits = { H: "D", D: "H", C: "S", S: "C" };
 
       // if not follow suit, disregard
       // trump suits always high
-
+      let trumpSuit = this.trump.suit;
       for (let card of cardsPlayed) {
-        if (card.pickedCard === new Card(this.trump.suit, { J: 11 })) {
+        //auto win if jack trump
+        console.log(card.pickedCard, new Card(trumpSuit, { J: 11 }));
+        console.log(
+          JSON.stringify(card.pickedCard) ===
+            JSON.stringify(new Card(trumpSuit, { J: 11 }))
+        );
+        if (
+          JSON.stringify(card.pickedCard) ===
+          JSON.stringify(new Card(trumpSuit, { J: 11 }))
+        ) {
           winner = card;
+          console.log("PLAYED HIGH TRUMP");
           break;
-        } else if (card.pickedCard === new Card(secondSuit, { J: 11 })) {
+        } else if (
+          //TODO: fix formatting/ :/
+          card.pickedCard ===
+          new Card(secondSuits[trumpSuit as keyof typeof secondSuits], {
+            J: 11
+          })
+        ) {
           winner = card;
-          break;
+          console.log("PLAYED SECOND HIGH TRUMP");
         } else if (card.pickedCard.suit === this.trump.suit) {
-        } else {
+          //trump higher
+          console.log("PLAYED TRUMP");
           if (
-            Object.values(card.pickedCard.value)[0] >
+            Object.values(card.pickedCard.value)[0] + 10 >
             Object.values(currWinner.pickedCard.value)[0]
           ) {
             currWinner = card;
           }
+        } else {
+          if (card.pickedCard.suit === this.startingSuit) {
+            console.log("PLAYED CORRECT SUIT");
+            if (
+              Object.values(card.pickedCard.value)[0] >
+              Object.values(currWinner.pickedCard.value)[0]
+            ) {
+              currWinner = card;
+            }
+          }
         }
 
-        if (cardsPlayed[cardsPlayed.length - 1] === card) {
+        if (
+          cardsPlayed[cardsPlayed.length - 1] === card &&
+          winner.pickedCard.suit === ""
+        ) {
           winner = currWinner;
         }
       }
