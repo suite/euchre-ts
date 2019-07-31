@@ -108,13 +108,12 @@ export class Game {
           break;
         }
         case GameState.INGAME: {
-          console.log(`debug ... checl`);
           //TODO; whoever wins starts
           let customIndex = starterNum; //1
-          console.log(`debug starter num: ${customIndex}`);
+
           for (let i = 0; i < 4; i++) {
             if (this.gameState !== GameState.INGAME) break;
-            console.log(`debug ... checl 2`);
+
             await this.input(this.players[customIndex]);
 
             if (customIndex === 3) {
@@ -125,6 +124,10 @@ export class Game {
           }
 
           this.findBest(this.currentHand);
+
+          //reset every round
+          this.currentHand = [];
+          this.startingSuit = "";
 
           break;
         }
@@ -316,10 +319,12 @@ export class Game {
           break;
         } else if (
           //TODO: fix formatting/ :/
-          card.pickedCard ===
-          new Card(secondSuits[trumpSuit as keyof typeof secondSuits], {
-            J: 11
-          })
+          JSON.stringify(card.pickedCard) ===
+          JSON.stringify(
+            new Card(secondSuits[trumpSuit as keyof typeof secondSuits], {
+              J: 11
+            })
+          )
         ) {
           winner = card;
           console.log("PLAYED SECOND HIGH TRUMP");
