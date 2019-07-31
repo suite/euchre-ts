@@ -103,18 +103,21 @@ export class Game {
             }
           }
           //force user to get trump
-          await this.input(this.players[customIndex], true);
+          if (this.gameState === GameState.TRUMP_TWO)
+            await this.input(this.players[customIndex], true);
           break;
         }
         case GameState.INGAME: {
+          console.log(`debug ... checl`);
           //TODO; whoever wins starts
           let customIndex = starterNum; //1
-          for (let i = 0; i < this.players.length; i++) {
+          console.log(`debug starter num: ${customIndex}`);
+          for (let i = 0; i < 4; i++) {
             if (this.gameState !== GameState.INGAME) break;
-
+            console.log(`debug ... checl 2`);
             await this.input(this.players[customIndex]);
 
-            if (customIndex === this.players.length - 1) {
+            if (customIndex === 3) {
               customIndex = 0;
             } else {
               customIndex++;
@@ -245,6 +248,7 @@ export class Game {
         break;
       }
       case GameState.INGAME: {
+        console.log("ingame being called..");
         console.log(`[${player.nickname}] You must play one card: `);
         let nums: Array<String> = [];
         for (let i = 0; i < player.cards.length; i++) {
@@ -283,6 +287,7 @@ export class Game {
   findBest(cardsPlayed: Array<Hand>) {
     //make sure we have a trump card "H", "D", "S", "C"
     if (this.trump) {
+      //TODO: clean this up
       let winner: Hand = {
         pickedCard: new Card("", {}),
         player: new Player(false, "")
