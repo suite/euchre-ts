@@ -1,0 +1,17 @@
+{
+  "name": "euchrets",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./build/index.js",
+  "scripts": {
+    "start": "npm run build && node .",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/prompts": "^2.0.1",
+    "prompts": "^2.1.0"
+  }
+}
