@@ -97,7 +97,7 @@ export class Game {
             await this.input(this.players[customIndex]);
 
             //TODO; check if error
-            if (customIndex === 2) {
+            if (customIndex === 3) {
               customIndex = 0;
             } else {
               customIndex++;
@@ -134,6 +134,7 @@ export class Game {
 
           //reset after 5 rounds
 
+          this.trump = undefined;
           let newDeck = new Deck();
           newDeck.shuffle();
           this.deck = newDeck;
@@ -263,7 +264,6 @@ export class Game {
         break;
       }
       case GameState.INGAME: {
-        console.log("ingame being called..");
         console.log(`[${player.nickname}] You must play one card: `);
         let nums: Array<String> = [];
         for (let i = 0; i < player.cards.length; i++) {
