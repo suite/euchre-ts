@@ -148,7 +148,7 @@ export class Game {
 
           //VERIFY THIS WORKS
           modiStarterNum++;
-          if (modiStarterNum > 4) {
+          if (modiStarterNum >= 4) {
             modiStarterNum = 0;
           }
 
@@ -157,6 +157,8 @@ export class Game {
           for (let i = 0; i < this.players.length; i++) {
             if (this.players[i].dealer) {
               //pass it on
+
+              //TODO: FIX BUG
               this.players[i].dealer = false;
               this.players[i + 1].dealer = true;
 
@@ -457,8 +459,6 @@ export class Game {
 
       //Add one to teams score
       winner.player.team.tempScore++;
-
-      console.log(`Team [${winner.player.team.name}] won the round`);
     }
   }
 }
