@@ -134,6 +134,7 @@ export class Game {
 
           //reset after 5 rounds
 
+          this.startingSuit = "";
           this.trump = undefined;
           let newDeck = new Deck();
           newDeck.shuffle();
