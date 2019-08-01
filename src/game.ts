@@ -3,7 +3,7 @@ import { Card } from "./card";
 import { Player } from "./player";
 import { GameState } from "./gamestate";
 import { Deck } from "./deck";
-
+import { Team } from "./team";
 interface Hand {
   pickedCard: Card;
   player: Player;
@@ -64,6 +64,7 @@ export class Game {
 
           console.log(`Trump: ${this.possibleTrump.format()}. Pickup or pass?`);
           let customIndex = starterNum; //1
+          console.log("debug..", customIndex);
           for (let i = 0; i < 4; i++) {
             if (this.gameState !== GameState.TRUMP_ONE) break;
 
@@ -97,7 +98,7 @@ export class Game {
             await this.input(this.players[customIndex]);
 
             //TODO; check if error
-            if (customIndex === 3) {
+            if (customIndex === 2) {
               customIndex = 0;
             } else {
               customIndex++;
@@ -134,13 +135,48 @@ export class Game {
 
           //reset after 5 rounds
 
+          let winners: Team = this.players[0].team;
+          for (let player of this.players) {
+            if (player.team.tempScore > winners.tempScore) {
+              winners = player.team;
+            }
+
+            //reset for now round
+            player.team.tempScore = 0;
+          }
+
+          winners.score++;
+          console.log(`+1 Point to team ${winners.name}`);
+
+          console.log(
+            `[${this.players[0].team.name}] Points: ${
+              this.players[0].team.score
+            }`
+          );
+          console.log(
+            `[${this.players[1].team.name}] Points: ${
+              this.players[1].team.score
+            }`
+          );
+
           this.startingSuit = "";
           this.trump = undefined;
           let newDeck = new Deck();
           newDeck.shuffle();
           this.deck = newDeck;
           this.deal();
-          starterNum++; //TODO; re asign to variable
+
+          //Go to next player //TODO; re asign to variables
+          for (let i = 0; i < 4; i++) {
+            if (starterNum === 3) {
+              starterNum = 0;
+            } else {
+              starterNum++;
+            }
+          }
+
+          console.log("DEBUG new starterum", starterNum);
+
           this.gameState = GameState.TRUMP_ONE;
 
           break;
@@ -306,7 +342,7 @@ export class Game {
       //TODO: clean this up
       let winner: Hand = {
         pickedCard: new Card("", {}),
-        player: new Player(false, "")
+        player: new Player(false, "", new Team(""))
       };
 
       //TODO add ten if trump
@@ -377,7 +413,10 @@ export class Game {
         }
       }
 
-      console.log(`Winner of the round: ${winner.player.nickname}`);
+      //Add one to teams score
+      winner.player.team.tempScore++;
+
+      console.log(`Team [${winner.player.team.name}] won the round`);
     }
   }
 }
