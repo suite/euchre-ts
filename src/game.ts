@@ -9,15 +9,6 @@ interface Hand {
   player: Player;
 }
 
-enum Test {
-  Nine,
-  Ten,
-  J,
-  Q,
-  K,
-  A
-}
-
 export class Game {
   gameState: GameState;
   deck: Deck;
