@@ -5,7 +5,8 @@
     "outDir": "./build/",
     "sourceMap": true,
     "lib": ["esnext", "dom"],
-    "strict": true
+    "strict": true,
+    "suppressImplicitAnyIndexErrors": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "client"]
