@@ -54,7 +54,9 @@ export class Game {
 
   //Main game loop
   async start(dealer: Player, starterNum: number) {
-    console.log(`Player #${starterNum + 1} is starting`);
+    let modiStarterNum: number = starterNum;
+    let modiDealer: Player = dealer;
+    console.log(`Player #${modiStarterNum + 1} is starting`);
     while (true) {
       switch (this.gameState) {
         case GameState.TRUMP_ONE: {
@@ -63,7 +65,7 @@ export class Game {
           ];
 
           console.log(`Trump: ${this.possibleTrump.format()}. Pickup or pass?`);
-          let customIndex = starterNum; //1
+          let customIndex = modiStarterNum; //1
           console.log("debug..", customIndex);
           for (let i = 0; i < 4; i++) {
             if (this.gameState !== GameState.TRUMP_ONE) break;
@@ -86,12 +88,12 @@ export class Game {
           break;
         }
         case GameState.DISCARD_CARD: {
-          await this.input(dealer);
+          await this.input(modiDealer);
           break;
         }
         case GameState.TRUMP_TWO: {
           // console.log("no trump");
-          let customIndex = starterNum; //1
+          let customIndex = modiStarterNum; //1
           for (let i = 0; i < 4; i++) {
             if (this.gameState !== GameState.TRUMP_TWO) break;
 
@@ -117,7 +119,7 @@ export class Game {
         }
         case GameState.INGAME: {
           //TODO; whoever wins starts
-          let customIndex = starterNum; //1
+          let customIndex = modiStarterNum; //1
 
           for (let i = 0; i < 5; i++) {
             for (let i = 0; i < 4; i++) {
@@ -140,6 +142,29 @@ export class Game {
           }
 
           //reset after 5 rounds
+
+          //Go to next player
+
+          //VERIFY THIS WORKS
+          modiStarterNum++;
+          if (modiStarterNum > 4) {
+            modiStarterNum = 0;
+          }
+
+          //Select new dealer
+
+          for (let i = 0; i < this.players.length; i++) {
+            if (this.players[i].dealer) {
+              //pass it on
+              this.players[i].dealer = false;
+              this.players[i + 1].dealer = true;
+
+              modiDealer = this.players[i + 1];
+
+              console.log(this.players[i + 1].dealer);
+              break;
+            }
+          }
 
           let winners: Team = this.players[0].team;
           for (let player of this.players) {
@@ -165,7 +190,7 @@ export class Game {
             }`
           );
 
-          //TODO: CHANGE DEALER
+          //TODO: Move to function
 
           this.startingSuit = "";
           this.trump = undefined;
@@ -174,16 +199,7 @@ export class Game {
           this.deck = newDeck;
           this.deal();
 
-          //Go to next player //TODO; re asign to variables
-          for (let i = 0; i < 4; i++) {
-            if (starterNum === 3) {
-              starterNum = 0;
-            } else {
-              starterNum++;
-            }
-          }
-
-          console.log("DEBUG new starterum", starterNum);
+          console.log("DEBUG new starterum", modiStarterNum);
 
           this.gameState = GameState.TRUMP_ONE;
 
