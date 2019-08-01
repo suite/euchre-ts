@@ -9,6 +9,15 @@ interface Hand {
   player: Player;
 }
 
+enum Test {
+  Nine,
+  Ten,
+  J,
+  Q,
+  K,
+  A
+}
+
 export class Game {
   gameState: GameState;
   deck: Deck;
@@ -23,6 +32,8 @@ export class Game {
     this.gameState = GameState.IDLE;
     this.currentHand = [];
     this.startingSuit = "";
+
+    console.log(`${this.deck.cards.length}${this.deck.cards.length}`);
   }
 
   deal() {
@@ -48,12 +59,6 @@ export class Game {
         console.log(`${card.format()}`);
       }
     }
-
-    this.possibleTrump = this.deck.cards[
-      Math.floor(Math.random() * this.deck.cards.length)
-    ];
-
-    console.log(`Trump: ${this.possibleTrump.format()}. Pickup or pass?`);
   }
 
   //Main game loop
@@ -62,6 +67,11 @@ export class Game {
     while (true) {
       switch (this.gameState) {
         case GameState.TRUMP_ONE: {
+          this.possibleTrump = this.deck.cards[
+            Math.floor(Math.random() * this.deck.cards.length)
+          ];
+
+          console.log(`Trump: ${this.possibleTrump.format()}. Pickup or pass?`);
           let customIndex = starterNum; //1
           for (let i = 0; i < 4; i++) {
             if (this.gameState !== GameState.TRUMP_ONE) break;
@@ -111,23 +121,34 @@ export class Game {
           //TODO; whoever wins starts
           let customIndex = starterNum; //1
 
-          for (let i = 0; i < 4; i++) {
-            if (this.gameState !== GameState.INGAME) break;
+          for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 4; i++) {
+              if (this.gameState !== GameState.INGAME) break;
 
-            await this.input(this.players[customIndex]);
+              await this.input(this.players[customIndex]);
 
-            if (customIndex === 3) {
-              customIndex = 0;
-            } else {
-              customIndex++;
+              if (customIndex === 3) {
+                customIndex = 0;
+              } else {
+                customIndex++;
+              }
             }
+
+            this.findBest(this.currentHand);
+
+            //reset every round
+            this.currentHand = [];
+            this.startingSuit = "";
           }
 
-          this.findBest(this.currentHand);
+          //reset after 5 rounds
 
-          //reset every round
-          this.currentHand = [];
-          this.startingSuit = "";
+          let newDeck = new Deck();
+          newDeck.shuffle();
+          this.deck = newDeck;
+          this.deal();
+          starterNum++; //TODO; re asign to variable
+          this.gameState = GameState.TRUMP_ONE;
 
           break;
         }
@@ -296,7 +317,14 @@ export class Game {
         player: new Player(false, "")
       };
 
+      //TODO add ten if trump
+
       let currWinner: Hand = cardsPlayed[0];
+      if (currWinner.pickedCard.suit === this.trump.suit) {
+        currWinner.pickedCard.value[
+          Object.keys(currWinner.pickedCard.value)[0]
+        ] = Object.values(currWinner.pickedCard.value)[0] + 10;
+      }
 
       const secondSuits = { H: "D", D: "H", C: "S", S: "C" };
 

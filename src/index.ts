@@ -14,9 +14,7 @@ const players: Array<Player> = [
 ];
 
 const game = new Game(deck, players);
-game.gameState = GameState.DEALING;
 game.deal();
-
 for (let i = 0; i < players.length; i++) {
   if (players[i].dealer) {
     let starter;
