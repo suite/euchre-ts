@@ -17,6 +17,7 @@ export class Game {
   possibleTrump?: Card;
   currentHand: Array<Hand>;
   startingSuit: string; //TODO: make sure to reset...
+  pickedTrump?: Team;
   constructor(deck: Deck, players: Array<Player>) {
     this.deck = deck;
     this.players = players;
@@ -167,17 +168,31 @@ export class Game {
           }
 
           let winners: Team = this.players[0].team;
-          for (let player of this.players) {
-            if (player.team.tempScore > winners.tempScore) {
-              winners = player.team;
-            }
 
-            //reset for now round
-            player.team.tempScore = 0;
+          //Loop through the first 2 players, each on different teams
+          for (let i = 0; i < 2; i++) {
+            if (this.players[i].team.tempScore === 5) {
+              winners = this.players[i].team;
+              this.players[i].team.score += 2;
+              break;
+            } else if (
+              this.players[i].team.tempScore >= 3 &&
+              this.players[i].team != this.pickedTrump
+            ) {
+              winners = this.players[i].team;
+              this.players[i].team.score += 2;
+              break;
+            } else {
+              //This should only have if the second team has higher score.
+              if (this.players[i].team.tempScore > winners.tempScore) {
+                winners = this.players[i].team;
+                this.players[i].team.score++;
+                break;
+              }
+            }
           }
 
-          winners.score++;
-          console.log(`+1 Point to team ${winners.name}`);
+          console.log(`[${winners.name}] won the round!`);
 
           console.log(
             `[${this.players[0].team.name}] Points: ${
@@ -194,6 +209,7 @@ export class Game {
 
           this.startingSuit = "";
           this.trump = undefined;
+          this.pickedTrump = undefined;
           let newDeck = new Deck();
           newDeck.shuffle();
           this.deck = newDeck;
@@ -222,6 +238,7 @@ export class Game {
         switch (response.value) {
           case "Y":
             this.trump = this.possibleTrump;
+            this.pickedTrump = player.team;
             if (this.trump) {
               //TODO: allow player to discard one card
               console.log(`${this.trump.format()} has been selected trump!`);
@@ -317,6 +334,7 @@ export class Game {
             break;
           default:
             this.trump = new Card(response.value, { Nine: 9 }); // value doesnt matter
+            this.pickedTrump = player.team;
             console.log(`${this.trump.suit} has been selected trump!`);
             this.gameState = GameState.INGAME;
             break;
