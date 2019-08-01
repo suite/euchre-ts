@@ -92,21 +92,27 @@ export class Game {
         case GameState.TRUMP_TWO: {
           // console.log("no trump");
           let customIndex = starterNum; //1
-          for (let i = 0; i < 3; i++) {
+          for (let i = 0; i < 4; i++) {
             if (this.gameState !== GameState.TRUMP_TWO) break;
 
             await this.input(this.players[customIndex]);
 
-            //TODO; check if error
-            if (customIndex === 2) {
+            //TODO; check if err
+
+            if (customIndex === 3) {
               customIndex = 0;
             } else {
               customIndex++;
             }
+
+            //force user to get trump
+            if (i === 2) {
+              //check to avoid past bug
+              if (this.gameState === GameState.TRUMP_TWO)
+                await this.input(this.players[customIndex], true);
+            }
           }
-          //force user to get trump
-          if (this.gameState === GameState.TRUMP_TWO)
-            await this.input(this.players[customIndex], true);
+
           break;
         }
         case GameState.INGAME: {
@@ -158,6 +164,8 @@ export class Game {
               this.players[1].team.score
             }`
           );
+
+          //TODO: CHANGE DEALER
 
           this.startingSuit = "";
           this.trump = undefined;
