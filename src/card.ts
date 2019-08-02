@@ -1,4 +1,6 @@
 //TODO: change to interface?
+import colors from "colors";
+
 export class Card {
   suit: string;
   value: object;
@@ -7,7 +9,20 @@ export class Card {
     this.value = value;
   }
 
+  //♦️♥️ ♠♣️️️
+
   format(): string {
-    return `Suit: ${this.suit} Value: ${Object.keys(this.value)[0]}`;
+    switch (this.suit) {
+      case "S":
+        return colors.black.bgWhite(`${Object.keys(this.value)[0]}♠️ `);
+      case "C":
+        return colors.black.bgWhite(`${Object.keys(this.value)[0]}♣️️️ `);
+      case "H":
+        return colors.red.bgWhite(`${Object.keys(this.value)[0]}♥️ `);
+      case "D":
+        return colors.red.bgWhite(`${Object.keys(this.value)[0]}♦️ `);
+      default:
+        return "unknown suit";
+    }
   }
 }

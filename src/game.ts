@@ -158,13 +158,20 @@ export class Game {
             if (this.players[i].dealer) {
               //pass it on
 
-              //TODO: FIX BUG
+              //TODO: FIX BUG !!!!!!
               this.players[i].dealer = false;
-              this.players[i + 1].dealer = true;
 
-              modiDealer = this.players[i + 1];
+              let dealIndex: number = i;
+              if (dealIndex === 3) {
+                dealIndex = 0;
+              } else {
+                dealIndex = i + 1;
+              }
+              this.players[dealIndex].dealer = true;
 
-              console.log(this.players[i + 1].dealer);
+              modiDealer = this.players[dealIndex];
+
+              console.log(this.players[dealIndex].dealer);
               break;
             }
           }
@@ -194,34 +201,42 @@ export class Game {
             }
           }
 
-          console.log(`[${winners.name}] won the round!`);
+          //TODO: change these numbers to constants
 
-          console.log(
-            `[${this.players[0].team.name}] Points: ${
-              this.players[0].team.score
-            }`
-          );
-          console.log(
-            `[${this.players[1].team.name}] Points: ${
-              this.players[1].team.score
-            }`
-          );
+          if (winners.score === 10) {
+            for (let i = 0; i < 10; i++)
+              console.log(`[${winners.name}] won the game!`);
+            this.gameState = GameState.FINISHED;
+          } else {
+            console.log(`[${winners.name}] won the round!`);
 
-          //TODO: Move to function
+            console.log(
+              `[${this.players[0].team.name}] Points: ${
+                this.players[0].team.score
+              }`
+            );
+            console.log(
+              `[${this.players[1].team.name}] Points: ${
+                this.players[1].team.score
+              }`
+            );
 
-          this.startingSuit = "";
-          this.trump = undefined;
-          this.pickedTrump = undefined;
-          let newDeck = new Deck();
-          newDeck.shuffle();
-          this.deck = newDeck;
-          this.deal();
+            //TODO: Move to function
 
-          console.log("DEBUG new starterum", modiStarterNum);
+            this.startingSuit = "";
+            this.trump = undefined;
+            this.pickedTrump = undefined;
+            let newDeck = new Deck();
+            newDeck.shuffle();
+            this.deck = newDeck;
+            this.deal();
 
-          this.gameState = GameState.TRUMP_ONE;
+            console.log("DEBUG new starterum", modiStarterNum);
 
-          break;
+            this.gameState = GameState.TRUMP_ONE;
+
+            break;
+          }
         }
       }
     }
@@ -347,10 +362,28 @@ export class Game {
       case GameState.INGAME: {
         console.log(`[${player.nickname}] You must play one card: `);
         let nums: Array<String> = [];
+        let hasStart: boolean = false;
+        //Make sure they follow suit
+        if (this.startingSuit != "" && this.trump) {
+          for (let i = 0; i < player.cards.length; i++) {
+            if (player.cards[i].suit === this.startingSuit) {
+              //they must play this card
+              hasStart = true;
+              nums.push(i.toString());
+            }
+          }
+        }
+
+        if (!hasStart) {
+          for (let i = 0; i < player.cards.length; i++) {
+            nums.push(i.toString());
+          }
+        }
+
         for (let i = 0; i < player.cards.length; i++) {
           console.log(`[${i}] ${player.cards[i].format()}`);
-          nums.push(i.toString());
         }
+
         const response = await prompts({
           type: "text",
           name: "value",
@@ -405,17 +438,17 @@ export class Game {
       let trumpSuit = this.trump.suit;
       for (let card of cardsPlayed) {
         //auto win if jack trump
-        console.log(card.pickedCard, new Card(trumpSuit, { J: 11 }));
-        console.log(
-          JSON.stringify(card.pickedCard) ===
-            JSON.stringify(new Card(trumpSuit, { J: 11 }))
-        );
+        // console.log(card.pickedCard, new Card(trumpSuit, { J: 11 }));
+        // console.log(
+        //   JSON.stringify(card.pickedCard) ===
+        //     JSON.stringify(new Card(trumpSuit, { J: 11 }))
+        // );
         if (
           JSON.stringify(card.pickedCard) ===
           JSON.stringify(new Card(trumpSuit, { J: 11 }))
         ) {
           winner = card;
-          console.log("PLAYED HIGH TRUMP");
+          // console.log("PLAYED HIGH TRUMP");
           break;
         } else if (
           //TODO: fix formatting/ :/
@@ -427,10 +460,10 @@ export class Game {
           )
         ) {
           winner = card;
-          console.log("PLAYED SECOND HIGH TRUMP");
+          // console.log("PLAYED SECOND HIGH TRUMP");
         } else if (card.pickedCard.suit === this.trump.suit) {
           //trump higher
-          console.log("PLAYED TRUMP");
+          // console.log("PLAYED TRUMP");
           if (
             Object.values(card.pickedCard.value)[0] + 10 >
             Object.values(currWinner.pickedCard.value)[0]
@@ -439,7 +472,7 @@ export class Game {
           }
         } else {
           if (card.pickedCard.suit === this.startingSuit) {
-            console.log("PLAYED CORRECT SUIT");
+            // console.log("PLAYED CORRECT SUIT");
             if (
               Object.values(card.pickedCard.value)[0] >
               Object.values(currWinner.pickedCard.value)[0]
@@ -456,6 +489,8 @@ export class Game {
           winner = currWinner;
         }
       }
+
+      console.log(`[${winner.player.nickname}] won the round!`);
 
       //Add one to teams score
       winner.player.team.tempScore++;
