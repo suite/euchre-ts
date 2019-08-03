@@ -14,13 +14,13 @@ export class Card {
   format(): string {
     switch (this.suit) {
       case "S":
-        return colors.black.bgWhite(`${Object.keys(this.value)[0]}♠️ `);
+        return colors.black.bgWhite(`${Object.keys(this.value)[0]}♠ `);
       case "C":
-        return colors.black.bgWhite(`${Object.keys(this.value)[0]}♣️️️ `);
+        return colors.black.bgWhite(`${Object.keys(this.value)[0]}♣ `);
       case "H":
-        return colors.red.bgWhite(`${Object.keys(this.value)[0]}♥️ `);
+        return colors.red.bgWhite(`${Object.keys(this.value)[0]}♥ `);
       case "D":
-        return colors.red.bgWhite(`${Object.keys(this.value)[0]}♦️ `);
+        return colors.red.bgWhite(`${Object.keys(this.value)[0]}♦ `);
       default:
         return "unknown suit";
     }
