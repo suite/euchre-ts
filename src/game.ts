@@ -24,8 +24,6 @@ export class Game {
     this.gameState = GameState.IDLE;
     this.currentHand = [];
     this.startingSuit = "";
-
-    console.log(`${this.deck.cards.length}${this.deck.cards.length}`);
   }
 
   deal() {
@@ -58,7 +56,7 @@ export class Game {
     let modiStarterNum: number = starterNum;
     let modiDealer: Player = dealer;
     console.log(`Player #${modiStarterNum + 1} is starting`);
-    while (true) {
+    while (this.gameState !== GameState.FINISHED) {
       switch (this.gameState) {
         case GameState.TRUMP_ONE: {
           this.possibleTrump = this.deck.cards[
@@ -67,7 +65,7 @@ export class Game {
 
           console.log(`Trump: ${this.possibleTrump.format()}. Pickup or pass?`);
           let customIndex = modiStarterNum; //1
-          console.log("debug..", customIndex);
+
           for (let i = 0; i < 4; i++) {
             if (this.gameState !== GameState.TRUMP_ONE) break;
 
@@ -230,8 +228,6 @@ export class Game {
             newDeck.shuffle();
             this.deck = newDeck;
             this.deal();
-
-            console.log("DEBUG new starterum", modiStarterNum);
 
             this.gameState = GameState.TRUMP_ONE;
 
