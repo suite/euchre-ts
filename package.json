@@ -8,8 +8,8 @@
     "build": "tsc"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Matt C.",
+  "license": "UNLICENSED",
   "dependencies": {
     "@types/prompts": "^2.0.1",
     "colors": "^1.3.3",
