@@ -1,4 +1,3 @@
-//TODO: change to interface?
 import colors from "colors";
 
 export class Card {
