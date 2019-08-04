@@ -1,4 +1,4 @@
-# euchrets
+# euchre-ts
 EuchreTs is the complete euchre card game written purley in typescript.
 
 ### Installation
