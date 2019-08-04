@@ -1,5 +1,5 @@
 # euchre-ts
-EuchreTs is the complete euchre card game written purely in typescript.
+EuchreTs is the complete [euchre](https://en.wikipedia.org/wiki/Euchre) card game written purely in typescript.
 
 ### Installation
 Setup:
