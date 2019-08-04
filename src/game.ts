@@ -16,7 +16,7 @@ export class Game {
   trump?: Card;
   possibleTrump?: Card;
   currentHand: Array<Hand>;
-  startingSuit: string; //TODO: make sure to reset...
+  startingSuit: string;
   pickedTrump?: Team;
   constructor(deck: Deck, players: Array<Player>) {
     this.deck = deck;
@@ -91,14 +91,11 @@ export class Game {
           break;
         }
         case GameState.TRUMP_TWO: {
-          // console.log("no trump");
           let customIndex = modiStarterNum; //1
           for (let i = 0; i < 4; i++) {
             if (this.gameState !== GameState.TRUMP_TWO) break;
 
             await this.input(this.players[customIndex]);
-
-            //TODO; check if err
 
             if (customIndex === 3) {
               customIndex = 0;
@@ -133,7 +130,11 @@ export class Game {
               }
             }
 
-            this.findBest(this.currentHand);
+            let winner = this.findBest(this.currentHand);
+
+            console.log(`[${winner.nickname}] won the round!`);
+
+            customIndex = this.players.indexOf(winner);
 
             //reset every round
             this.currentHand = [];
@@ -144,7 +145,6 @@ export class Game {
 
           //Go to next player
 
-          //VERIFY THIS WORKS
           modiStarterNum++;
           if (modiStarterNum >= 4) {
             modiStarterNum = 0;
@@ -156,7 +156,6 @@ export class Game {
             if (this.players[i].dealer) {
               //pass it on
 
-              //TODO: FIX BUG !!!!!!
               this.players[i].dealer = false;
 
               let dealIndex: number = i;
@@ -409,87 +408,78 @@ export class Game {
     }
   }
 
-  findBest(cardsPlayed: Array<Hand>) {
+  findBest(cardsPlayed: Array<Hand>): Player {
     //make sure we have a trump card "H", "D", "S", "C"
-    if (this.trump) {
-      //TODO: clean this up
-      let winner: Hand = {
-        pickedCard: new Card("", {}),
-        player: new Player(false, "", new Team(""))
-      };
 
-      //TODO add ten if trump
+    //TODO: clean this up
+    let winner: Hand = {
+      pickedCard: new Card("", {}),
+      player: new Player(false, "", new Team(""))
+    };
 
-      let currWinner: Hand = cardsPlayed[0];
-      if (currWinner.pickedCard.suit === this.trump.suit) {
-        currWinner.pickedCard.value[
-          Object.keys(currWinner.pickedCard.value)[0]
-        ] = Object.values(currWinner.pickedCard.value)[0] + 10;
-      }
+    //TODO clean up undefined
+    let trumpSuit = "";
+    if (this.trump) trumpSuit = this.trump.suit;
 
-      const secondSuits = { H: "D", D: "H", C: "S", S: "C" };
+    let currWinner: Hand = cardsPlayed[0];
+    if (currWinner.pickedCard.suit === trumpSuit) {
+      currWinner.pickedCard.value[Object.keys(currWinner.pickedCard.value)[0]] =
+        Object.values(currWinner.pickedCard.value)[0] + 10;
+    }
 
-      // if not follow suit, disregard
-      // trump suits always high
-      let trumpSuit = this.trump.suit;
-      for (let card of cardsPlayed) {
-        //auto win if jack trump
-        // console.log(card.pickedCard, new Card(trumpSuit, { J: 11 }));
-        // console.log(
-        //   JSON.stringify(card.pickedCard) ===
-        //     JSON.stringify(new Card(trumpSuit, { J: 11 }))
-        // );
+    const secondSuits = { H: "D", D: "H", C: "S", S: "C" };
+
+    // if not follow suit, disregard
+    // trump suits always high
+
+    for (let card of cardsPlayed) {
+      //auto win if jack trump
+      if (
+        JSON.stringify(card.pickedCard) ===
+        JSON.stringify(new Card(trumpSuit, { J: 11 }))
+      ) {
+        winner = card;
+        // console.log("PLAYED HIGH TRUMP");
+        break;
+      } else if (
+        JSON.stringify(card.pickedCard) ===
+        JSON.stringify(
+          new Card(secondSuits[trumpSuit as keyof typeof secondSuits], {
+            J: 11
+          })
+        )
+      ) {
+        winner = card;
+      } else if (card.pickedCard.suit === trumpSuit) {
         if (
-          JSON.stringify(card.pickedCard) ===
-          JSON.stringify(new Card(trumpSuit, { J: 11 }))
+          Object.values(card.pickedCard.value)[0] + 10 >
+          Object.values(currWinner.pickedCard.value)[0]
         ) {
-          winner = card;
-          // console.log("PLAYED HIGH TRUMP");
-          break;
-        } else if (
-          //TODO: fix formatting/ :/
-          JSON.stringify(card.pickedCard) ===
-          JSON.stringify(
-            new Card(secondSuits[trumpSuit as keyof typeof secondSuits], {
-              J: 11
-            })
-          )
-        ) {
-          winner = card;
-          // console.log("PLAYED SECOND HIGH TRUMP");
-        } else if (card.pickedCard.suit === this.trump.suit) {
-          //trump higher
-          // console.log("PLAYED TRUMP");
+          currWinner = card;
+        }
+      } else {
+        if (card.pickedCard.suit === this.startingSuit) {
+          // console.log("PLAYED CORRECT SUIT");
           if (
-            Object.values(card.pickedCard.value)[0] + 10 >
+            Object.values(card.pickedCard.value)[0] >
             Object.values(currWinner.pickedCard.value)[0]
           ) {
             currWinner = card;
           }
-        } else {
-          if (card.pickedCard.suit === this.startingSuit) {
-            // console.log("PLAYED CORRECT SUIT");
-            if (
-              Object.values(card.pickedCard.value)[0] >
-              Object.values(currWinner.pickedCard.value)[0]
-            ) {
-              currWinner = card;
-            }
-          }
-        }
-
-        if (
-          cardsPlayed[cardsPlayed.length - 1] === card &&
-          winner.pickedCard.suit === ""
-        ) {
-          winner = currWinner;
         }
       }
 
-      console.log(`[${winner.player.nickname}] won the round!`);
-
-      //Add one to teams score
-      winner.player.team.tempScore++;
+      if (
+        cardsPlayed[cardsPlayed.length - 1] === card &&
+        winner.pickedCard.suit === ""
+      ) {
+        winner = currWinner;
+      }
     }
+
+    //Add one to teams score
+    winner.player.team.tempScore++;
+
+    return winner.player;
   }
 }
