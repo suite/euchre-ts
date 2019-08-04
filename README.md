@@ -1,7 +1,17 @@
 # euchrets
+EuchreTs is the complete euchre card game written purley in typescript.
 
-How to run:
-git clone <project url>
+### Installation
+Setup:
+
+```sh
+git clone https://github.com/suite/euchrets.git
 cd euchrets
-npm i 
+npm i # "sudo npm i" if you're on macOS or Linux
+```
+
+Run After Setup:
+
+```sh
 npm start
+```
