@@ -114,7 +114,6 @@ export class Game {
           break;
         }
         case GameState.INGAME: {
-          //TODO; whoever wins starts
           let customIndex = modiStarterNum; //1
 
           for (let i = 0; i < 5; i++) {
@@ -252,7 +251,6 @@ export class Game {
             this.trump = this.possibleTrump;
             this.pickedTrump = player.team;
             if (this.trump) {
-              //TODO: allow player to discard one card
               console.log(`${this.trump.format()} has been selected trump!`);
               this.gameState = GameState.DISCARD_CARD;
             }
@@ -284,8 +282,7 @@ export class Game {
             validate: value => nums.includes(value)
           });
 
-          //TODO: make a private message,
-          //TODO: replace cards in deck
+          //TODO: make a private message
 
           console.log(
             `${player.cards[
