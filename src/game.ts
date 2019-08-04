@@ -411,11 +411,7 @@ export class Game {
   findBest(cardsPlayed: Array<Hand>): Player {
     //make sure we have a trump card "H", "D", "S", "C"
 
-    //TODO: clean this up
-    let winner: Hand = {
-      pickedCard: new Card("", {}),
-      player: new Player(false, "", new Team(""))
-    };
+    let winner: Hand = cardsPlayed[0];
 
     //TODO clean up undefined
     let trumpSuit = "";
@@ -439,7 +435,7 @@ export class Game {
         JSON.stringify(new Card(trumpSuit, { J: 11 }))
       ) {
         winner = card;
-        // console.log("PLAYED HIGH TRUMP");
+
         break;
       } else if (
         JSON.stringify(card.pickedCard) ===
@@ -459,7 +455,7 @@ export class Game {
         }
       } else {
         if (card.pickedCard.suit === this.startingSuit) {
-          // console.log("PLAYED CORRECT SUIT");
+          // played correct suit
           if (
             Object.values(card.pickedCard.value)[0] >
             Object.values(currWinner.pickedCard.value)[0]
